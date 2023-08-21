@@ -1,6 +1,6 @@
 {
   "name": "release-automation-action",
-  "version": "0.0.0",
+  "version": "0.0.0-beta",
   "private": true,
   "description": "Proposes next version to release",
   "main": "lib/main.js",
