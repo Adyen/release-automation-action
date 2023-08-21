@@ -1,0 +1,22 @@
+name: Prepare release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  v1:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Preparing the next main release
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          develop-branch: main
+          release-branch: releases/v1
+          version-files: package.json

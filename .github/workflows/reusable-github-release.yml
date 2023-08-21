@@ -1,0 +1,49 @@
+name: Reusable Github release
+
+on:
+  workflow_call:
+    secrets:
+      token:
+        description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
+        required: true
+    inputs:
+      release-title:
+        description: 'Release title prefix'
+        required: true
+        type: string
+      develop-branch:
+        description: 'Branch used for development'
+        required: true
+        type: string
+      release-branch:
+        description: 'Branch used for distribution'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.token }}
+      - name: Grab current version
+        id: current-version
+        run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT
+      - name: Create new release
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+          CURRENT_VERSION: ${{ steps.current-version.outputs.current-version }}
+        run: |
+          prerelease=$(node -pe "process.env.CURRENT_VERSION.includes('-') ? '--prerelease' : ''")
+          gh release create "v${CURRENT_VERSION}" \
+            --title "${{ inputs.release-title }} v${CURRENT_VERSION}" \
+            --generate-notes $prerelease --target ${{ inputs.release-branch }}
+      - name: Update development branch
+        run: |
+          git checkout ${{ inputs.develop-branch }}
+          git rebase origin/${{ inputs.release-branch }}
+          git push origin ${{ inputs.develop-branch }}
