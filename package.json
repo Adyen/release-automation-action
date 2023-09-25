@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/michaelpaul/release-automation-action.git"
+    "url": "git+https://github.com/adyen/release-automation-action.git"
   },
   "keywords": [
     "actions",
