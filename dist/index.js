@@ -101,9 +101,11 @@ const core = __importStar(__nccwpck_require__(2186));
 // List of merged pull requests in Markdown
 function changelog(changeset) {
     const entries = new Set();
-    for (const { node: { associatedPullRequests: prs } } of changeset.repository.ref.compare.commits.edges) {
-        for (const { node: { number: number } } of prs.edges) {
-            entries.add(number);
+    if (changeset.repository.ref !== null) {
+        for (const { node: { associatedPullRequests: prs } } of changeset.repository.ref.compare.commits.edges) {
+            for (const { node: { number: number } } of prs.edges) {
+                entries.add(number);
+            }
         }
     }
     return Array.from(entries)
@@ -196,7 +198,8 @@ function compareBranches(token, { owner, repo, base, head }) {
 exports.compareBranches = compareBranches;
 // Scan the changelog to decide what kind of release we need
 function detectChanges(changeset) {
-    if (!changeset || changeset.repository.ref.compare.aheadBy < 1) {
+    if (changeset.repository.ref === null ||
+        changeset.repository.ref.compare.aheadBy < 1) {
         // Nothing to release
         return '';
     }
@@ -228,7 +231,7 @@ function bump() {
             required: true
         });
         const preRelease = core.getInput('pre-release');
-        const base = core.getInput('release-branch');
+        const base = `v${currentVersion}`;
         const head = core.getInput('develop-branch');
         const changeset = yield compareBranches(token, Object.assign(Object.assign({}, github.context.repo), { base,
             head }));
