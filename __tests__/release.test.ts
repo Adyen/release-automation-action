@@ -102,10 +102,20 @@ const comparisonFixture: release.Comparison = {
   }
 }
 
+const refNotFound: release.Comparison = {
+  repository: {name: 'adyen-cobol-api-library', ref: null}
+}
+
 test('Changelog', () => {
   const changelog = release.changelog(comparisonFixture)
 
   expect(changelog).toStrictEqual(['- #10', '- #20', '- #30'])
+})
+
+test('Changelog null ref', () => {
+  const changelog = release.changelog(refNotFound)
+
+  expect(changelog).toStrictEqual([])
 })
 
 describe('Detect changes', () => {
@@ -117,16 +127,22 @@ describe('Detect changes', () => {
 
   test('Zero changes', () => {
     let sync = structuredClone(comparisonFixture)
-    sync.repository.ref.compare.aheadBy = 0
+    sync.repository.ref!.compare.aheadBy = 0
 
     const ver = release.detectChanges(sync)
 
     expect(ver).toBe('')
   })
 
+  test('Ref not found', () => {
+    const ver = release.detectChanges(refNotFound)
+
+    expect(ver).toBe('')
+  })
+
   test('No labels', () => {
     let noLabels = structuredClone(comparisonFixture)
-    for (const edge of noLabels.repository.ref.compare.commits.edges) {
+    for (const edge of noLabels.repository.ref!.compare.commits.edges) {
       for (const prs of edge.node.associatedPullRequests.edges) {
         prs.node.labels.nodes = []
       }

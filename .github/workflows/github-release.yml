@@ -4,16 +4,17 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - releases/v1
+      - main
+    paths:
+      - VERSION
 
 jobs:
-  v1:
+  github:
     permissions:
       contents: write
     uses: ./.github/workflows/reusable-github-release.yml
     with:
-      release-title: Release Automation Action 
+      release-title: Release Automation Action
       develop-branch: main
-      release-branch: releases/v1
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}

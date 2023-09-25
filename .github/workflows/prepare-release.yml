@@ -1,12 +1,18 @@
 name: Prepare release
 
 on:
-  push:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - closed
+      - labeled
+      - unlabeled
     branches:
       - main
 
 jobs:
-  v1:
+  candidate:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged && !startsWith(github.head_ref, 'promote/'))
     permissions:
       contents: write
       pull-requests: write
@@ -18,5 +24,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           develop-branch: main
-          release-branch: releases/v1
           version-files: package.json
