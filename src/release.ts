@@ -9,7 +9,8 @@ export interface Label {
 export interface Comparison {
   repository: {
     name: string
-    ref: {
+    // ref is null when the current version has not been published yet
+    ref: null | {
       compare: {
         aheadBy: number
         commits: {
@@ -38,26 +39,28 @@ export interface Comparison {
 export function changelog(changeset: Comparison): string[] {
   const entries: Set<number> = new Set()
 
-  for (const {
-    node: {associatedPullRequests: prs}
-  } of changeset.repository.ref.compare.commits.edges) {
+  if (changeset.repository.ref !== null) {
     for (const {
-      node: {number: number}
-    } of prs.edges) {
-      entries.add(number)
+      node: {associatedPullRequests: prs}
+    } of changeset.repository.ref.compare.commits.edges) {
+      for (const {
+        node: {number: number}
+      } of prs.edges) {
+        entries.add(number)
+      }
     }
   }
 
   return Array.from(entries)
-    .sort((a, b) => a - b)
-    .map(pr => `- #${pr}`)
+      .sort((a, b) => a - b)
+      .map(pr => `- #${pr}`)
 }
 
 // Next semantic version number
 export function nextVersion(
-  current: string,
-  increment: string,
-  preRelease: string
+    current: string,
+    increment: string,
+    preRelease: string
 ): string {
   let major: number
   let minor: number
@@ -117,12 +120,12 @@ interface BranchComparison {
 
 // Compare two branches on Github
 export async function compareBranches(
-  token: string,
-  {owner, repo, base, head}: BranchComparison
+    token: string,
+    {owner, repo, base, head}: BranchComparison
 ): Promise<Comparison> {
   const octokit = github.getOctokit(token)
   return await octokit.graphql(
-    `
+      `
     query($owner: String!, $repo: String!, $base: String!, $head: String!) {
         repository(owner: $owner, name: $repo) {
           name
@@ -153,13 +156,16 @@ export async function compareBranches(
         }
     }
     `,
-    {owner, repo, base, head}
+      {owner, repo, base, head}
   )
 }
 
 // Scan the changelog to decide what kind of release we need
 export function detectChanges(changeset: Comparison): string {
-  if (!changeset || changeset.repository.ref.compare.aheadBy < 1) {
+  if (
+      changeset.repository.ref === null ||
+      changeset.repository.ref.compare.aheadBy < 1
+  ) {
     // Nothing to release
     return ''
   }
@@ -199,7 +205,7 @@ export async function bump(): Promise<void> {
     required: true
   })
   const preRelease: string = core.getInput('pre-release')
-  const base: string = core.getInput('release-branch')
+  const base = `v${currentVersion}`
   const head: string = core.getInput('develop-branch')
 
   const changeset = await compareBranches(token, {
