@@ -170,32 +170,21 @@ export function detectChanges(changeset: Comparison): string {
     return ''
   }
 
-  let increment = 'patch'
-
-  // increment based on the merged PR labels
-  for (const {
-    node: {associatedPullRequests: prs}
-  } of changeset.repository.ref.compare.commits.edges) {
-    for (const {
-      node: {
-        labels: {nodes: labels}
-      }
-    } of prs.edges) {
-      for (const {name: label} of labels) {
-        const normalizedLabel = label.toLowerCase().replace(' ', '-')
-        switch (normalizedLabel) {
-          case 'feature':
-            increment = 'minor'
-            break
-          case 'breaking-change':
-            increment = 'major'
-            break
-        }
-      }
+  const edges =  changeset.repository.ref.compare.commits.edges.reduce((edgesTotal, edge) => {
+    return edgesTotal.concat(edge.node.associatedPullRequests.edges);
+  }, []);
+  const labels = edges.reduce((labelsTotal, edge) => {
+    if(edge?.node?.labels?.nodes) {
+      return labelsTotal.concat(edge.node.labels.nodes);
     }
-  }
+    return labelsTotal;
+  }, [])
+  const normalizedLabels = labels.map((label) => label?.name.toLowerCase().replace(' ', '-'));
+  console.log(JSON.stringify(normalizedLabels));
 
-  return increment
+  if(normalizedLabels.includes('breaking-change')) { return 'major';}
+  if(normalizedLabels.includes('feature')) { return 'minor';}
+  return 'patch';
 }
 
 // Define next release
