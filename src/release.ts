@@ -170,17 +170,21 @@ export function detectChanges(changeset: Comparison): string {
     return ''
   }
 
+  // Reduce changeset to just its edges
   const edges =  changeset.repository.ref.compare.commits.edges.reduce((edgesTotal, edge) => {
     return edgesTotal.concat(edge.node.associatedPullRequests.edges);
   }, []);
+
+  // Reduce edges to just the PR label objects
   const labels = edges.reduce((labelsTotal, edge) => {
     if(edge?.node?.labels?.nodes) {
       return labelsTotal.concat(edge.node.labels.nodes);
     }
     return labelsTotal;
   }, [])
+
+  // Normalize labels ot cover for spaces, dashes and uppercases
   const normalizedLabels = labels.map((label) => label?.name.toLowerCase().replace(' ', '-'));
-  console.log(JSON.stringify(normalizedLabels));
 
   if(normalizedLabels.includes('breaking-change')) { return 'major';}
   if(normalizedLabels.includes('feature')) { return 'minor';}
