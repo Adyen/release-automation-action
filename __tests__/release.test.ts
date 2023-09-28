@@ -102,6 +102,196 @@ const comparisonFixture: release.Comparison = {
   }
 }
 
+const associatedPullRequestsMajor = {
+  repository: {
+    name: 'adyen-node-api-library',
+    ref: {
+      compare: {
+        aheadBy: 8,
+        commits: {
+          edges: [
+            {
+              node: {
+                message: 'Another commit in the same PR non squashed',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 20,
+                        labels: {
+                          nodes: [
+                            {
+                              name: 'Breaking change'
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              node: {
+                message: 'Fixing the constructor',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 10,
+                        labels: {
+                          nodes: [
+                            {
+                              name: 'Fix'
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              node: {
+                message: 'Upgrade some service',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 20,
+                        labels: {
+                          nodes: [
+                            {
+                              name: 'Feature'
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              node: {
+                message: 'Update CODEOWNERS (#965)',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 30,
+                        labels: {
+                          nodes: []
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+const associatedPullRequestsMinor = {
+  repository: {
+    name: 'adyen-node-api-library',
+    ref: {
+      compare: {
+        aheadBy: 8,
+        commits: {
+          edges: [
+            {
+              node: {
+                message: 'Another commit in the same PR non squashed',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 20,
+                        labels: {
+                          nodes: [
+                            {
+                              name: ''
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              node: {
+                message: 'Fixing the constructor',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 10,
+                        labels: {
+                          nodes: [
+                            {
+                              name: 'Feature'
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              node: {
+                message: 'Upgrade some service',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 20,
+                        labels: {
+                          nodes: [
+                            {
+                              name: 'Fix'
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              node: {
+                message: 'Update CODEOWNERS (#965)',
+                associatedPullRequests: {
+                  edges: [
+                    {
+                      node: {
+                        number: 30,
+                        labels: {
+                          nodes: []
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
 const refNotFound: release.Comparison = {
   repository: {name: 'adyen-cobol-api-library', ref: null}
 }
@@ -151,6 +341,18 @@ describe('Detect changes', () => {
     const ver = release.detectChanges(noLabels)
 
     expect(ver).toBe('patch')
+  })
+
+  test('Major first', () => {
+    const ver = release.detectChanges(associatedPullRequestsMajor)
+
+    expect(ver).toBe('major')
+  })
+
+  test('Minor', () => {
+    const ver = release.detectChanges(associatedPullRequestsMinor)
+
+    expect(ver).toBe('minor')
   })
 })
 

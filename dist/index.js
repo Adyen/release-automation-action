@@ -215,7 +215,7 @@ function detectChanges(changeset) {
                         break;
                     case 'breaking-change':
                         increment = 'major';
-                        break;
+                        return increment;
                 }
             }
         }

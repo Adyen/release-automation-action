@@ -52,15 +52,15 @@ export function changelog(changeset: Comparison): string[] {
   }
 
   return Array.from(entries)
-      .sort((a, b) => a - b)
-      .map(pr => `- #${pr}`)
+    .sort((a, b) => a - b)
+    .map(pr => `- #${pr}`)
 }
 
 // Next semantic version number
 export function nextVersion(
-    current: string,
-    increment: string,
-    preRelease: string
+  current: string,
+  increment: string,
+  preRelease: string
 ): string {
   let major: number
   let minor: number
@@ -120,12 +120,12 @@ interface BranchComparison {
 
 // Compare two branches on Github
 export async function compareBranches(
-    token: string,
-    {owner, repo, base, head}: BranchComparison
+  token: string,
+  {owner, repo, base, head}: BranchComparison
 ): Promise<Comparison> {
   const octokit = github.getOctokit(token)
   return await octokit.graphql(
-      `
+    `
     query($owner: String!, $repo: String!, $base: String!, $head: String!) {
         repository(owner: $owner, name: $repo) {
           name
@@ -156,15 +156,15 @@ export async function compareBranches(
         }
     }
     `,
-      {owner, repo, base, head}
+    {owner, repo, base, head}
   )
 }
 
 // Scan the changelog to decide what kind of release we need
 export function detectChanges(changeset: Comparison): string {
   if (
-      changeset.repository.ref === null ||
-      changeset.repository.ref.compare.aheadBy < 1
+    changeset.repository.ref === null ||
+    changeset.repository.ref.compare.aheadBy < 1
   ) {
     // Nothing to release
     return ''
@@ -189,7 +189,7 @@ export function detectChanges(changeset: Comparison): string {
             break
           case 'breaking-change':
             increment = 'major'
-            break
+            return increment
         }
       }
     }
