@@ -60,30 +60,36 @@ export function changelog(changeset: Comparison): string[] {
 export function nextVersion(
   current: string,
   increment: string,
-  preRelease: string
+  preRelease: string,
+  separator: string
 ): string {
   let major: number
   let minor: number
   let patch: number
   const parts: number[] = current.split('.').map(x => parseInt(x, 10))
   ;[major, minor, patch] = parts
-  const [unstaged, stage] = current.split('-')
+  const [unstaged, stage] = current.split(separator)
   const isPreRelease: boolean = preRelease === 'true'
+  const hasStaging: boolean = current.includes(separator)
+
+  if (!separator) {
+    throw new Error('Separator is required')
+  }
 
   // end pre-release
-  if (!isPreRelease && stage) {
+  if (!isPreRelease && hasStaging) {
     return unstaged
   }
 
   // bump pre-release
-  if (isPreRelease && stage) {
+  if (isPreRelease && hasStaging) {
     const [, stageVersion] = stage.split('.')
     let version: number = parseInt(stageVersion)
     if (isNaN(version)) {
       version = 0
     }
     version++
-    return `${unstaged}-beta.${version}`
+    return `${unstaged}${separator}.${version}`
   }
 
   switch (increment) {
@@ -104,8 +110,8 @@ export function nextVersion(
   const version = [major, minor, patch].join('.')
 
   // start pre-release
-  if (isPreRelease && !stage) {
-    return `${version}-beta`
+  if (isPreRelease && !hasStaging) {
+    return `${version}${separator}`
   }
 
   return version
@@ -205,6 +211,7 @@ export async function bump(): Promise<void> {
     required: true
   })
   const preRelease: string = core.getInput('pre-release')
+  const customSeparator: string = core.getInput('separator')
   const base = `v${currentVersion}`
   const head: string = core.getInput('develop-branch')
 
@@ -215,7 +222,12 @@ export async function bump(): Promise<void> {
   })
   const logs = changelog(changeset)
   const increment = detectChanges(changeset)
-  const next = nextVersion(currentVersion, increment, preRelease)
+  const next = nextVersion(
+    currentVersion,
+    increment,
+    preRelease,
+    customSeparator
+  )
 
   core.setOutput('increment', increment)
   core.setOutput('next-version', next)

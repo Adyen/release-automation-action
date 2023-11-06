@@ -114,27 +114,31 @@ function changelog(changeset) {
 }
 exports.changelog = changelog;
 // Next semantic version number
-function nextVersion(current, increment, preRelease) {
+function nextVersion(current, increment, preRelease, separator) {
     let major;
     let minor;
     let patch;
     const parts = current.split('.').map(x => parseInt(x, 10));
     [major, minor, patch] = parts;
-    const [unstaged, stage] = current.split('-');
+    const [unstaged, stage] = current.split(separator);
     const isPreRelease = preRelease === 'true';
+    const hasStaging = current.includes(separator);
+    if (!separator) {
+        throw new Error('Separator is required');
+    }
     // end pre-release
-    if (!isPreRelease && stage) {
+    if (!isPreRelease && hasStaging) {
         return unstaged;
     }
     // bump pre-release
-    if (isPreRelease && stage) {
+    if (isPreRelease && hasStaging) {
         const [, stageVersion] = stage.split('.');
         let version = parseInt(stageVersion);
         if (isNaN(version)) {
             version = 0;
         }
         version++;
-        return `${unstaged}-beta.${version}`;
+        return `${unstaged}${separator}.${version}`;
     }
     switch (increment) {
         case 'patch':
@@ -152,8 +156,8 @@ function nextVersion(current, increment, preRelease) {
     }
     const version = [major, minor, patch].join('.');
     // start pre-release
-    if (isPreRelease && !stage) {
-        return `${version}-beta`;
+    if (isPreRelease && !hasStaging) {
+        return `${version}${separator}`;
     }
     return version;
 }
@@ -231,13 +235,14 @@ function bump() {
             required: true
         });
         const preRelease = core.getInput('pre-release');
+        const customSeparator = core.getInput('separator');
         const base = `v${currentVersion}`;
         const head = core.getInput('develop-branch');
         const changeset = yield compareBranches(token, Object.assign(Object.assign({}, github.context.repo), { base,
             head }));
         const logs = changelog(changeset);
         const increment = detectChanges(changeset);
-        const next = nextVersion(currentVersion, increment, preRelease);
+        const next = nextVersion(currentVersion, increment, preRelease, customSeparator);
         core.setOutput('increment', increment);
         core.setOutput('next-version', next);
         core.setOutput('changelog', logs.join('\n'));

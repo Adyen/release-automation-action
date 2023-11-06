@@ -8,6 +8,9 @@ inputs:
   pre-release:
     description: 'This release will be labeled as non-production ready'
     default: false
+  separator:
+    description: 'Separator between main version and pre-release version'
+    default: '-beta'
   develop-branch:
     description: 'Branch used for development and distribution'
     default: develop
