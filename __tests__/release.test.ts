@@ -357,53 +357,47 @@ describe('Detect changes', () => {
 })
 
 describe('Get next version', () => {
-  test('Major', () => {
-    const ver = release.nextVersion('13.1.2', 'major', '')
+  const separator = '-beta'
+  const customSeparator = '.pre'
 
-    expect(ver).toBe('14.0.0')
+  test('Missing separator', () => {
+    expect(() =>
+      release.nextVersion('15.0.0-beta', 'major', 'false', '')
+    ).toThrow('Separator is required')
   })
 
-  test('Minor', () => {
-    const ver = release.nextVersion('13.1.2', 'minor', '')
+  test.each([
+    // 'Major'
+    ['13.1.2', 'major', '', separator, '14.0.0'],
+    // 'Minor'
+    ['13.1.2', 'minor', '', separator, '13.2.0'],
+    // 'Patch'
+    ['13.1.2', 'patch', '', separator, '13.1.3'],
+    // 'Unchanged'
+    ['1.2.3', '', '', separator, '1.2.3'],
+    // 'Start pre-release'
+    ['14.1.5', 'major', 'true', separator, '15.0.0-beta'],
+    ['14.1.5', 'major', 'true', customSeparator, '15.0.0.pre'],
+    ['14.1.5', 'major', 'true', '.pre.alpha', '15.0.0.pre.alpha'],
+    // 'Bump first pre-release'
+    ['15.0.0-beta', 'minor', 'true', separator, '15.0.0-beta.1'],
+    ['15.0.0.pre', 'minor', 'true', customSeparator, '15.0.0.pre.1'],
+    ['15.0.0.pre.beta', 'minor', 'true', '.pre.beta', '15.0.0.pre.beta.1'],
+    // 'Bump second pre-release'
+    ['15.0.0-beta.1', 'patch', 'true', separator, '15.0.0-beta.2'],
+    ['15.0.0.pre.1', 'patch', 'true', customSeparator, '15.0.0.pre.2'],
+    ['15.0.0.pre.beta.1', 'patch', 'true', '.pre.beta', '15.0.0.pre.beta.2'],
+    // 'End pre-release'
+    ['15.0.0-beta', 'major', 'false', separator, '15.0.0'],
+    ['8.0.0.pre.beta.1', 'major', 'false', customSeparator, '8.0.0']
+  ])(
+    'current(%s), increment(%s), preRelease(%s), separator(%s)',
+    (current, increment, preRelease, separator, expected) => {
+      const ver = release.nextVersion(current, increment, preRelease, separator)
 
-    expect(ver).toBe('13.2.0')
-  })
-
-  test('Patch', () => {
-    const ver = release.nextVersion('13.1.2', 'patch', '')
-
-    expect(ver).toBe('13.1.3')
-  })
-
-  test('Unchanged', () => {
-    const ver = release.nextVersion('1.2.3', '', '')
-
-    expect(ver).toBe('1.2.3')
-  })
-
-  test('Start pre-release', () => {
-    const ver = release.nextVersion('14.1.5', 'major', 'true')
-
-    expect(ver).toBe('15.0.0-beta')
-  })
-
-  test('Bump first pre-release', () => {
-    const ver = release.nextVersion('15.0.0-beta', 'minor', 'true')
-
-    expect(ver).toBe('15.0.0-beta.1')
-  })
-
-  test('Bump second pre-release', () => {
-    const ver = release.nextVersion('15.0.0-beta.1', 'patch', 'true')
-
-    expect(ver).toBe('15.0.0-beta.2')
-  })
-
-  test('End pre-release', () => {
-    const ver = release.nextVersion('15.0.0-beta', 'major', 'false')
-
-    expect(ver).toBe('15.0.0')
-  })
+      expect(ver).toBe(expected)
+    }
+  )
 })
 
 test('Compare branches', async () => {
@@ -429,6 +423,8 @@ test('Bump', async () => {
     switch (input) {
       case 'current-version':
         return '1.2.3'
+      case 'separator':
+        return '-beta'
       default:
         return ''
     }

@@ -8,6 +8,9 @@ inputs:
   pre-release:
     description: 'This release will be labeled as non-production ready'
     default: false
+  separator:
+    description: 'Separator between main version and pre-release version'
+    default: '-beta'
   develop-branch:
     description: 'Branch used for development and distribution'
     default: develop
@@ -35,6 +38,7 @@ runs:
       env:
         INPUT_TOKEN: ${{ inputs.token }}
         INPUT_PRE-RELEASE: ${{ inputs.pre-release }}
+        INPUT_SEPARATOR: ${{ inputs.separator }}
         INPUT_DEVELOP-BRANCH: ${{ inputs.develop-branch }}
         INPUT_CURRENT-VERSION: ${{ steps.current-version.outputs.current-version }}
     - name: Bump
@@ -48,7 +52,7 @@ runs:
       with:
         token: ${{ inputs.token }}
         base: ${{ inputs.develop-branch }}
-        branch: promote/${{ inputs.develop-branch }}/to/v${{ steps.release.outputs.next-version }}
+        branch: promote/${{ inputs.develop-branch }}
         title: Release v${{steps.release.outputs.next-version}}
         body: |
           Merged pull requests to be released:

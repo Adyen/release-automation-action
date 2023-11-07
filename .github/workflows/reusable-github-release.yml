@@ -30,11 +30,20 @@ jobs:
         id: current-version
         run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT
       - name: Create new release
-        env:
-          GH_TOKEN: ${{ secrets.token }}
-          CURRENT_VERSION: ${{ steps.current-version.outputs.current-version }}
-        run: |
-          prerelease=$(node -pe "process.env.CURRENT_VERSION.includes('-') ? '--prerelease' : ''")
-          gh release create "v${CURRENT_VERSION}" \
-            --title "${{ inputs.release-title }} v${CURRENT_VERSION}" \
-            --generate-notes $prerelease --target ${{ inputs.develop-branch }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.token }}
+          script: |
+            const currentVersion = "${{ steps.current-version.outputs.current-version }}";
+            const stableVersion = /^\d+\.\d+\.\d+$/;
+            const preRelease = !stableVersion.test(currentVersion);
+
+            github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `v${currentVersion}`,
+              target_commitish: "${{ inputs.develop-branch }}",
+              name: `${{ inputs.release-title }} v${currentVersion}`,
+              generate_release_notes: true,
+              prerelease: preRelease
+            });
