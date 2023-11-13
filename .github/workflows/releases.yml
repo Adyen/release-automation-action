@@ -1,0 +1,21 @@
+name: Releases
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  releases:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/reusable-release.yml
+    with:
+      release-title: Release Automation Action
+      develop-branch: main
+      version-files: package.json
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}

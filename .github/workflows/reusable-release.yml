@@ -1,0 +1,43 @@
+name: Release Automation
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: 'Prepare or publish a release'
+        type: string
+        required: false
+        default: 'prepare'
+      pre-release:
+        description: "Prepare a non-production ready release"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  prepare:
+    if: (inputs.stage == 'prepare') || (github.event.pull_request.merged && ! contains(github.event.pull_request.labels.*.name, 'release'))
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare the next main release
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          develop-branch: main
+          version-files: README.md
+          pre-release: ${{ inputs.pre-release || false }}
+  publish:
+    if: (inputs.stage == 'publish') || (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release'))
+    permissions:
+      contents: write
+    # TODO inline job instead of nesting 
+    uses: ./.github/workflows/reusable-github-release.yml
+    with:
+      release-title: My Random Library
+      develop-branch: main
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
