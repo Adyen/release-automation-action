@@ -12,11 +12,27 @@ on:
         description: 'Release title prefix'
         required: true
         type: string
+      develop-branch:
+        description: 'Branch used for development and distribution'
+        required: true
+        type: string
       pre-release:
         description: "Prepare a non-production ready release"
         type: boolean
         required: false
         default: false
+      token:
+        description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
+        default: ${{ github.token }}
+        type: string
+      separator:
+        description: 'Separator between main version and pre-release version'
+        default: '-beta'
+        type: string
+      version-files:
+        description: 'Files to bump with the new version'
+        required: false
+        type: string
 
 jobs:
   prepare:
@@ -30,10 +46,10 @@ jobs:
       - name: Prepare the next main release
         uses: ./
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          develop-branch: main
-          version-files: README.md
-          pre-release: ${{ inputs.pre-release || false }}
+          token: ${{ inputs.token }}
+          develop-branch: ${{ inputs.develop-branch }}
+          version-files: ${{ inputs.version-files }}
+          pre-release: ${{ inputs.pre-release }}
   publish:
     if: (inputs.stage == 'publish') || (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release'))
     permissions:
@@ -42,6 +58,6 @@ jobs:
     uses: ./.github/workflows/reusable-github-release.yml
     with:
       release-title: ${{ inputs.release-title }}
-      develop-branch: main
+      develop-branch: ${{ inputs.develop-branch }}
     secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ inputs.token }}
