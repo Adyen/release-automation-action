@@ -2,6 +2,10 @@ name: Release Automation
 
 on:
   workflow_call:
+    secrets:
+      token:
+        description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
+        required: true
     inputs:
       stage:
         description: 'Prepare or publish a release'
@@ -21,10 +25,6 @@ on:
         type: boolean
         required: false
         default: false
-      token:
-        description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
-        default: ${{ github.token }}
-        type: string
       separator:
         description: 'Separator between main version and pre-release version'
         default: '-beta'
@@ -46,7 +46,7 @@ jobs:
       - name: Prepare the next main release
         uses: ./
         with:
-          token: ${{ inputs.token }}
+          token: ${{ secrets.token }}
           develop-branch: ${{ inputs.develop-branch }}
           version-files: ${{ inputs.version-files }}
           pre-release: ${{ inputs.pre-release }}
@@ -60,4 +60,4 @@ jobs:
       release-title: ${{ inputs.release-title }}
       develop-branch: ${{ inputs.develop-branch }}
     secrets:
-      token: ${{ inputs.token }}
+      token: ${{ secrets.token }}
