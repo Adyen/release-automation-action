@@ -27,6 +27,8 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Clone consumer repository
+      uses: actions/checkout@v4
     - name: Grab current version
       id: current-version
       run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT
