@@ -5,6 +5,9 @@ inputs:
   token:
     description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
     default: ${{ github.token }}
+  release-title:
+    description: 'Release title prefix'
+    required: true
   pre-release:
     description: 'This release will be labeled as non-production ready'
     default: false
@@ -29,6 +32,9 @@ runs:
   steps:
     - name: Clone consumer repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ inputs.token }}
     - name: Grab current version
       id: current-version
       run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT
@@ -72,3 +78,22 @@ runs:
         token: ${{ inputs.token }}
         pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
         merge-method: merge
+    - name: Create a new Github release
+      uses: actions/github-script@v6
+      if: github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release')
+      with:
+        github-token: ${{ inputs.token }}
+        script: |
+          const currentVersion = "${{ steps.current-version.outputs.current-version }}";
+          const stableVersion = /^\d+\.\d+\.\d+$/;
+          const preRelease = !stableVersion.test(currentVersion);
+
+          github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: `v${currentVersion}`,
+            target_commitish: "${{ inputs.develop-branch }}",
+            name: `${{ inputs.release-title }} v${currentVersion}`,
+            generate_release_notes: true,
+            prerelease: preRelease
+          });
