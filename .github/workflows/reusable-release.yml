@@ -8,6 +8,10 @@ on:
         type: string
         required: false
         default: 'prepare'
+      release-title:
+        description: 'Release title prefix'
+        required: true
+        type: string
       pre-release:
         description: "Prepare a non-production ready release"
         type: boolean
@@ -37,7 +41,7 @@ jobs:
     # TODO inline job instead of nesting 
     uses: ./.github/workflows/reusable-github-release.yml
     with:
-      release-title: My Random Library
+      release-title: ${{ inputs.release-title }}
       develop-branch: main
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
