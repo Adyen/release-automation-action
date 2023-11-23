@@ -1,27 +1,31 @@
-name: Prepare release
+name: Release management
 
 on:
   workflow_dispatch:
+    inputs:
+      pre-release:
+        required: false
+        type: boolean
+        default: false
+        description: "This release will be labeled as non-production ready"
   pull_request:
     types:
       - closed
-      - labeled
-      - unlabeled
     branches:
       - main
 
 jobs:
-  candidate:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged && !startsWith(github.head_ref, 'promote/'))
+  release:
     permissions:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Preparing the next main release
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           develop-branch: main
           version-files: package.json
+          pre-release: ${{ inputs.pre-release || false }}
+          release-title: Release Automation Action

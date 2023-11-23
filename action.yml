@@ -79,8 +79,8 @@ runs:
         pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
         merge-method: merge
     - name: Create a new Github release
-      uses: actions/github-script@v6
       if: github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release')
+      uses: actions/github-script@v6
       with:
         github-token: ${{ inputs.token }}
         script: |
