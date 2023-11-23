@@ -35,6 +35,7 @@ runs:
       with:
         fetch-depth: 0
         token: ${{ inputs.token }}
+        ref: ${{ inputs.develop-branch }}
     - name: Grab current version
       id: current-version
       run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT

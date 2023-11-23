@@ -1,4 +1,4 @@
-name: 'build-test'
+name: 'Build and Integration Test'
 
 on:
   pull_request:
@@ -27,3 +27,5 @@ jobs:
           pre-release: true
           develop-branch: beta
           version-files: README.md package.json
+          release-title: Release Automation Action Beta
+          separator: '.beta.test'
