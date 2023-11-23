@@ -23,6 +23,7 @@ const comparisonFixture: release.Comparison = {
                     {
                       node: {
                         number: 20,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -44,6 +45,7 @@ const comparisonFixture: release.Comparison = {
                     {
                       node: {
                         number: 10,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -65,6 +67,7 @@ const comparisonFixture: release.Comparison = {
                     {
                       node: {
                         number: 20,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -86,6 +89,7 @@ const comparisonFixture: release.Comparison = {
                     {
                       node: {
                         number: 30,
+                        merged: false,
                         labels: {
                           nodes: []
                         }
@@ -118,6 +122,7 @@ const associatedPullRequestsMajor = {
                     {
                       node: {
                         number: 20,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -139,6 +144,7 @@ const associatedPullRequestsMajor = {
                     {
                       node: {
                         number: 10,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -160,6 +166,7 @@ const associatedPullRequestsMajor = {
                     {
                       node: {
                         number: 20,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -181,6 +188,7 @@ const associatedPullRequestsMajor = {
                     {
                       node: {
                         number: 30,
+                        merged: true,
                         labels: {
                           nodes: []
                         }
@@ -213,6 +221,7 @@ const associatedPullRequestsMinor = {
                     {
                       node: {
                         number: 20,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -234,6 +243,7 @@ const associatedPullRequestsMinor = {
                     {
                       node: {
                         number: 10,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -255,6 +265,7 @@ const associatedPullRequestsMinor = {
                     {
                       node: {
                         number: 20,
+                        merged: true,
                         labels: {
                           nodes: [
                             {
@@ -276,6 +287,7 @@ const associatedPullRequestsMinor = {
                     {
                       node: {
                         number: 30,
+                        merged: true,
                         labels: {
                           nodes: []
                         }
@@ -306,6 +318,19 @@ test('Changelog null ref', () => {
   const changelog = release.changelog(refNotFound)
 
   expect(changelog).toStrictEqual([])
+})
+
+test('Filter merged PR', () => {
+  const merged = release.filterMerged(comparisonFixture)
+  const changelog = release.changelog(merged)
+
+  expect(changelog).toStrictEqual(['- #10', '- #20'])
+})
+
+test('Filter merged PR no changes', () => {
+  const merged = release.filterMerged(refNotFound)
+
+  expect(merged).toStrictEqual(refNotFound)
 })
 
 describe('Detect changes', () => {

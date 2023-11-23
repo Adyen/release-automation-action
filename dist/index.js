@@ -95,7 +95,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.bump = exports.detectChanges = exports.compareBranches = exports.nextVersion = exports.changelog = void 0;
+exports.bump = exports.detectChanges = exports.filterMerged = exports.compareBranches = exports.nextVersion = exports.changelog = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 // List of merged pull requests in Markdown
@@ -181,6 +181,7 @@ function compareBranches(token, { owner, repo, base, head }) {
                       edges {
                         node {
                           number
+                          merged
                           labels(first: 5) {
                             nodes {
                               name
@@ -200,6 +201,19 @@ function compareBranches(token, { owner, repo, base, head }) {
     });
 }
 exports.compareBranches = compareBranches;
+// Include only merged PR's
+function filterMerged(changeset) {
+    if (changeset.repository.ref !== null) {
+        const merged = changeset.repository.ref.compare.commits.edges.filter(edge => {
+            return edge.node.associatedPullRequests.edges.some(pr => {
+                return pr.node.merged;
+            });
+        });
+        changeset.repository.ref.compare.commits.edges = merged;
+    }
+    return changeset;
+}
+exports.filterMerged = filterMerged;
 // Scan the changelog to decide what kind of release we need
 function detectChanges(changeset) {
     if (changeset.repository.ref === null ||
@@ -238,8 +252,9 @@ function bump() {
         const customSeparator = core.getInput('separator');
         const base = `v${currentVersion}`;
         const head = core.getInput('develop-branch');
-        const changeset = yield compareBranches(token, Object.assign(Object.assign({}, github.context.repo), { base,
+        let changeset = yield compareBranches(token, Object.assign(Object.assign({}, github.context.repo), { base,
             head }));
+        changeset = filterMerged(changeset);
         const logs = changelog(changeset);
         const increment = detectChanges(changeset);
         const next = nextVersion(currentVersion, increment, preRelease, customSeparator);
