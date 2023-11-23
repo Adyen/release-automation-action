@@ -25,7 +25,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pre-release: true
-          develop-branch: beta
+          develop-branch: ${{ github.head_ref }}
           version-files: README.md package.json
           release-title: Release Automation Action Beta
           separator: '.beta.test'
