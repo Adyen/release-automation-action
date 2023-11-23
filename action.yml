@@ -79,6 +79,7 @@ runs:
     - name: Enable Pull Request Auto-merge
       if: inputs.enable-auto-merge == '1' && steps.cpr.outputs.pull-request-operation == 'created'
       run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+      shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
     - name: Create a new Github release
