@@ -20,6 +20,10 @@ inputs:
   version-files:
     description: 'Files to bump with the new version'
     required: false
+  enable-auto-merge:
+    description: 'Enable release pull request auto-merge'
+    required: false
+    default: '1'
 outputs:
   increment:
     description: 'Type of the next release (e.g. major)'
@@ -72,13 +76,11 @@ runs:
         commit-message: "chore(release): bump to ${{steps.release.outputs.next-version}}"
         delete-branch: true
         labels: release
-    - name: Enable Pull Request Automerge
-      if: steps.cpr.outputs.pull-request-operation == 'created'
-      uses: peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d # v3.0.0
-      with:
-        token: ${{ inputs.token }}
-        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-        merge-method: merge
+    - name: Enable Pull Request Auto-merge
+      if: inputs.enable-auto-merge == '1' && steps.cpr.outputs.pull-request-operation == 'created'
+      run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+      env:
+        GH_TOKEN: ${{ inputs.token }}
     - name: Create a new Github release
       if: github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release')
       uses: actions/github-script@v6

@@ -29,3 +29,4 @@ jobs:
           version-files: README.md package.json
           release-title: Release Automation Action Beta
           separator: '.beta.test'
+          enable-auto-merge: 0
