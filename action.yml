@@ -105,6 +105,7 @@ runs:
           });
           return 'Created';
     - name: Run summary
+      shell: bash
       run: |
         echo "- Current version: ${{steps.current-version.outputs.current-version}}" >> $GITHUB_STEP_SUMMARY
         echo "- Next version: ${{steps.release.outputs.next-version}}" >> $GITHUB_STEP_SUMMARY
