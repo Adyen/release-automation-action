@@ -84,9 +84,11 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
     - name: Create a new Github release
       if: github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release')
+      id: gh-release
       uses: actions/github-script@v6
       with:
         github-token: ${{ inputs.token }}
+        result-encoding: string
         script: |
           const currentVersion = "${{ steps.current-version.outputs.current-version }}";
           const stableVersion = /^\d+\.\d+\.\d+$/;
@@ -101,3 +103,10 @@ runs:
             generate_release_notes: true,
             prerelease: preRelease
           });
+          return 'Created';
+    - name: Run summary
+      run: |
+        echo "- Current version: ${{steps.current-version.outputs.current-version}}" >> $GITHUB_STEP_SUMMARY
+        echo "- Next version: ${{steps.release.outputs.next-version}}" >> $GITHUB_STEP_SUMMARY
+        echo "- Release pull request: ${{ steps.cpr.outputs.pull-request-number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Github release: ${{ steps.gh-release.outputs.result }}" >> $GITHUB_STEP_SUMMARY
