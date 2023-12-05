@@ -21,6 +21,7 @@ export interface Comparison {
                 edges: {
                   node: {
                     number: number
+                    merged: boolean
                     labels: {
                       nodes: Label[]
                     }
@@ -130,7 +131,7 @@ export async function compareBranches(
   {owner, repo, base, head}: BranchComparison
 ): Promise<Comparison> {
   const octokit = github.getOctokit(token)
-  return await octokit.graphql(
+  return await octokit.graphql<Comparison>(
     `
     query($owner: String!, $repo: String!, $base: String!, $head: String!) {
         repository(owner: $owner, name: $repo) {
@@ -146,6 +147,7 @@ export async function compareBranches(
                       edges {
                         node {
                           number
+                          merged
                           labels(first: 5) {
                             nodes {
                               name
@@ -164,6 +166,21 @@ export async function compareBranches(
     `,
     {owner, repo, base, head}
   )
+}
+
+// Include only merged PR's
+export function filterMerged(changeset: Comparison): Comparison {
+  if (changeset.repository.ref !== null) {
+    const merged = changeset.repository.ref.compare.commits.edges.filter(
+      edge => {
+        return edge.node.associatedPullRequests.edges.some(pr => {
+          return pr.node.merged
+        })
+      }
+    )
+    changeset.repository.ref.compare.commits.edges = merged
+  }
+  return changeset
 }
 
 // Scan the changelog to decide what kind of release we need
@@ -215,11 +232,12 @@ export async function bump(): Promise<void> {
   const base = `v${currentVersion}`
   const head: string = core.getInput('develop-branch')
 
-  const changeset = await compareBranches(token, {
+  let changeset = await compareBranches(token, {
     ...github.context.repo,
     base,
     head
   })
+  changeset = filterMerged(changeset)
   const logs = changelog(changeset)
   const increment = detectChanges(changeset)
   const next = nextVersion(

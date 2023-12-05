@@ -4,6 +4,17 @@
 
 A GitHub action to propose the next version to release of your repository.
 
+## Prerequisites
+
+* Branch protection rules (in Branch Settings)
+  - To prevent auto-merging releases into your `develop-branch` without reviews (e.g. 2 approvals)
+* Allow auto-merge (in General Settings)
+  - If you want to release right after merging the PR, otherwise use the `enable-auto-merge` option
+* Allow GitHub Actions to create and approve pull requests (in Actions Settings)
+  - If you use the default `secrets.GITHUB_TOKEN`, otherwise use a `repo` scoped Personal Access Token (PAT)
+
+Copy this [changelog configuration](.github/release.yml) into your repository and label your PR's with it's categories.
+
 ## Code in Main
 
 > First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance. Consider using [Github Codespaces](https://github.com/features/codespaces) or [Gitpod](https://www.gitpod.io/).

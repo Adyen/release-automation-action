@@ -5,6 +5,9 @@ inputs:
   token:
     description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT)'
     default: ${{ github.token }}
+  release-title:
+    description: 'Release title prefix'
+    required: true
   pre-release:
     description: 'This release will be labeled as non-production ready'
     default: false
@@ -17,6 +20,10 @@ inputs:
   version-files:
     description: 'Files to bump with the new version'
     required: false
+  enable-auto-merge:
+    description: 'Enable release pull request auto-merge'
+    required: false
+    default: '1'
 outputs:
   increment:
     description: 'Type of the next release (e.g. major)'
@@ -27,6 +34,12 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Clone consumer repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ inputs.token }}
+        ref: ${{ inputs.develop-branch }}
     - name: Grab current version
       id: current-version
       run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT
@@ -63,10 +76,38 @@ runs:
         commit-message: "chore(release): bump to ${{steps.release.outputs.next-version}}"
         delete-branch: true
         labels: release
-    - name: Enable Pull Request Automerge
-      if: steps.cpr.outputs.pull-request-operation == 'created'
-      uses: peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d # v3.0.0
+    - name: Enable Pull Request Auto-merge
+      if: inputs.enable-auto-merge == '1' && steps.cpr.outputs.pull-request-operation == 'created'
+      run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+    - name: Create a new Github release
+      if: github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release')
+      id: gh-release
+      uses: actions/github-script@v6
       with:
-        token: ${{ inputs.token }}
-        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-        merge-method: merge
+        github-token: ${{ inputs.token }}
+        result-encoding: string
+        script: |
+          const currentVersion = "${{ steps.current-version.outputs.current-version }}";
+          const stableVersion = /^\d+\.\d+\.\d+$/;
+          const preRelease = !stableVersion.test(currentVersion);
+
+          github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: `v${currentVersion}`,
+            target_commitish: "${{ inputs.develop-branch }}",
+            name: `${{ inputs.release-title }} v${currentVersion}`,
+            generate_release_notes: true,
+            prerelease: preRelease
+          });
+          return 'Created';
+    - name: Run summary
+      shell: bash
+      run: |
+        echo "- Current version: ${{steps.current-version.outputs.current-version}}" >> $GITHUB_STEP_SUMMARY
+        echo "- Next version: ${{steps.release.outputs.next-version}}" >> $GITHUB_STEP_SUMMARY
+        echo "- Release pull request: ${{ steps.cpr.outputs.pull-request-number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Github release: ${{ steps.gh-release.outputs.result }}" >> $GITHUB_STEP_SUMMARY
