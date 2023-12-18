@@ -16,12 +16,12 @@ inputs:
     default: '-beta'
   develop-branch:
     description: 'Branch used for development and distribution'
-    default: develop
+    default: main
   version-files:
     description: 'Files to bump with the new version'
     required: false
   github-release:
-    description: "Publish Github release for the current version"
+    description: 'Publish Github release for the current version'
     required: false
   enable-auto-merge:
     description: 'Enable release pull request auto-merge'
