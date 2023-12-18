@@ -20,6 +20,9 @@ inputs:
   version-files:
     description: 'Files to bump with the new version'
     required: false
+  github-release:
+    description: "Publish Github release for the current version"
+    required: false
   enable-auto-merge:
     description: 'Enable release pull request auto-merge'
     required: false
@@ -83,7 +86,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.token }}
     - name: Create a new Github release
-      if: github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release')
+      if: inputs.github-release || (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release'))
       id: gh-release
       uses: actions/github-script@v6
       with:
