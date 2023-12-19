@@ -86,7 +86,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.token }}
     - name: Create a new Github release
-      if: inputs.github-release || (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release'))
+      if: inputs.github-release == 'true' || (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release'))
       id: gh-release
       uses: actions/github-script@v6
       with:
