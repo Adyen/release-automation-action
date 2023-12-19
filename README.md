@@ -19,27 +19,30 @@ A GitHub action to minimize manual steps required to release (semantic) versions
   - If you want to release right after merging the PR, otherwise use the `enable-auto-merge` option
 * Allow GitHub Actions to create and approve pull requests (in Actions Settings)
   - If you use the default `secrets.GITHUB_TOKEN`, otherwise use a `repo` scoped Personal Access Token (PAT)
-
-Copy this [changelog configuration](.github/release.yml) into your repository and label your PR's with it's categories.
+* Copy this [changelog configuration](.github/release.yml) into your repository and label your PR's with it's categories.
 
 Create a workflow using this [example](.github/workflows/releases.yml):
 
-```
+```yaml
 name: Release management
 
 on:
+  # Manual run from Github UI (e.g. for when a merged PR labels have changed)
   workflow_dispatch:
     inputs:
+      # Propose a "-beta" when you want to share a testing version
       pre-release:
         required: false
         type: boolean
         default: false
         description: "This release will be labeled as non-production ready"
+      # Publish the current version now, useful if the automated run failed
       github-release:
         required: false
         type: boolean
         default: false
         description: "Publish Github release for the current version"
+  # Monitor pull request events
   pull_request:
     types:
       - closed
@@ -48,6 +51,7 @@ on:
 
 jobs:
   release:
+    # Permisson to push commits and create pull requests
     permissions:
       contents: write
       pull-requests: write
@@ -56,39 +60,21 @@ jobs:
       - name: Preparing the next release
         uses: Adyen/release-automation-action@v1.2.0
         with:
+          # Using a PAT gives the workflow more autonomy than the default GITHUB_TOKEN  
           token: ${{ secrets.YOUR_PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+          # Branch to monitor, should be listed in `on.pull_request.branches`
           develop-branch: main
+          # List of files (separated by spaces) to write the project's version
           version-files: package.json
+          # Propose production release by default
           pre-release: ${{ inputs.pre-release || false }}
+          # For a manual Github release 
           github-release: ${{ inputs.github-release || false }}
+          # Prefix to be used on your Github release
           release-title: Your Project Name
 ```
 
-This example contains two inputs that can be provided manually (`workflow_dispatch`) via the Github UI: 
-
-* Pre-release: will prepare a "-beta" version for when you want to share a "testing" version.
-* Github-release: to publish the current/first version now if the automated run failed
-
-## Inputs
-
-| Input               | Default      | Description                                                 |
-| ------------------- | ------------ | ----------------------------------------------------------- |
-| `token`             | github.token | GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT) |
-| `release-title`     |              | Release title prefix                                        |
-| `pre-release`       | false        | This release will be labeled as non-production ready        |
-| `separator`         | -beta        | Separator between main version and pre-release version      |
-| `develop-branch`    | main         | Branch used for development and distribution                |
-| `version-files`     |              | A list of files to write a version number                   |
-| `github-release`    |              | Publish Github release for the current version              |
-| `enable-auto-merge` | 1            | Enable release pull request auto-merge                      |
-
-## Outputs
-
-| Output         | Description                                    |
-| -------------- | ---------------------------------------------- |
-| `increment`    | Type of the next release (e.g. major)          |
-| `next-version` | Suggestion of which version should go out next |
-| `changelog`    | List of merged pull requests unreleased        |
+For a complete list of inputs and outputs see [action.yml](action.yml).
 
 # Development
 
@@ -104,7 +90,7 @@ Build the typescript and package it for distribution
 $ npm run build && npm run package
 ```
 
-Run the tests :heavy_check_mark:  
+Run the unit tests :heavy_check_mark:  
 ```bash
 $ npm test
 
@@ -138,29 +124,15 @@ run()
 
 See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
 
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
 ## Validate
 
-This action performs an integration test by referencing `./` in a [test.yml](.github/workflows/test.yml) workflow.
+We perform an integration test by referencing `./` in [test.yml](.github/workflows/test.yml) workflow.
 
-See the [actions tab](https://github.com/Adyen/release-automation-action/actions) for runs of this action! :rocket:
+See the [actions tab](https://github.com/Adyen/release-automation-action/actions) for runs of this action! 
+
+## Self-publishing
+
+This action automates it's own releasing. See the [releases.yml](.github/workflows/releases.yml). :rocket:
 
 
 Disclaimer: _This is not an officially supported Adyen product._
