@@ -29,7 +29,7 @@ runs:
   steps:
     - name: Grab current version
       id: current-version
-      run: echo "current-version=$(cat VERSION)" >> $GITHUB_OUTPUT
+      run: echo "current-version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')"
       shell: bash
     - name: Prepare release request
       id: release
