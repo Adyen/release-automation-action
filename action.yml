@@ -53,7 +53,7 @@ runs:
         INPUT_SEPARATOR: ${{ inputs.separator }}
         INPUT_DEVELOP-BRANCH: ${{ inputs.develop-branch }}
         INPUT_CURRENT-VERSION: ${{ steps.current-version.outputs.current-version }}
-       - name: Create Pull Request
+    - name: Create Pull Request
       if: steps.release.outputs.next-version != steps.current-version.outputs.current-version
       id: cpr
       uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v5.0.2
