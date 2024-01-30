@@ -41,6 +41,7 @@ runs:
         token: ${{ inputs.token }}
         ref: ${{ inputs.develop-branch }}
     - name: Grab current version
+      id: version
       uses: actions/checkout@v2
       run: echo "current-version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
     - name: Prepare release request
