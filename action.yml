@@ -41,12 +41,8 @@ runs:
         token: ${{ inputs.token }}
         ref: ${{ inputs.develop-branch }}
     - name: Grab current version
-      id: current-version
-      run: echo "current-version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-      steps:
-      - uses: actions/checkout@v2
-        run: echo "current-version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-      shell: bash
+      uses: actions/checkout@v2
+      run: echo "current-version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
     - name: Prepare release request
       id: release
       run: node '${{ github.action_path }}/dist/index.js'
