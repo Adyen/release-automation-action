@@ -43,6 +43,7 @@ runs:
     - name: Grab current version
       id: current-version
       run: echo "current-version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      shell: bash
     - name: Prepare release request
       id: release
       run: node '${{ github.action_path }}/dist/index.js'
