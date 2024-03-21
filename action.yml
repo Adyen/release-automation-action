@@ -57,6 +57,10 @@ runs:
         INPUT_SEPARATOR: ${{ inputs.separator }}
         INPUT_DEVELOP-BRANCH: ${{ inputs.develop-branch }}
         INPUT_CURRENT-VERSION: ${{ steps.current-version.outputs.current-version }}
+    - name: Bump
+      run: |
+        perl -i -pe 's/${{steps.current-version.outputs.current-version}}/${{steps.release.outputs.next-version}}/' VERSION ${{ inputs.version-files }}
+      shell: bash
     - name: Create Pull Request
       if: steps.release.outputs.next-version != steps.current-version.outputs.current-version
       id: cpr
