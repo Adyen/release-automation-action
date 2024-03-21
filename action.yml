@@ -45,7 +45,7 @@ runs:
         ref: ${{ inputs.develop-branch }}
     - name: Grab current version
       id: current-version
-      run: echo "current-version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      run: echo "current-version=${cat VERSION}" >> $GITHUB_OUTPUT
       shell: bash
     - name: Prepare release request
       id: release
