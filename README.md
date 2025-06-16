@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Preparing the next release
-        uses: Adyen/release-automation-action@v1.2.0
+        uses: Adyen/release-automation-action@v1.3.0
         with:
           # Using a PAT gives the workflow more autonomy than the default GITHUB_TOKEN  
           token: ${{ secrets.YOUR_PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
@@ -134,5 +134,3 @@ See the [actions tab](https://github.com/Adyen/release-automation-action/actions
 
 This action automates it's own releasing. See the [releases.yml](.github/workflows/releases.yml). :rocket:
 
-
-Disclaimer: _This is not an officially supported Adyen product._
