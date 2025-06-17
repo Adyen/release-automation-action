@@ -1,6 +1,6 @@
 # Release Automation Action
 
-<a href="https://github.com/Adyen/release-automation-action/actions"><img alt="status" src="https://github.com/Adyen/release-automation-action/workflows/build-test/badge.svg"></a>
+[![Check dist](https://github.com/Adyen/release-automation-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/Adyen/release-automation-action/actions/workflows/check-dist.yml)
 
 A GitHub action to minimize manual steps required to release (semantic) versions of a software project. 
 
