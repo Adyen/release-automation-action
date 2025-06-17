@@ -85,9 +85,9 @@ Install the dependencies
 $ npm install
 ```
 
-Build the typescript and package it for distribution
+Build the project (will compile the TypeScript to JavaScript - outDir is `./lib`)  
 ```bash
-$ npm run build && npm run package
+$ npm run build 
 ```
 
 Run the unit tests :heavy_check_mark:  
@@ -100,6 +100,11 @@ $ npm test
   ✓ test runs (95ms)
 
 ...
+```
+
+Package for distribution (will create/update `./dist`)
+```bash
+$ npm run package
 ```
 
 ## Change the Code
