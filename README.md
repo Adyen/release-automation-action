@@ -1,6 +1,6 @@
 # Release Automation Action
 
-<a href="https://github.com/Adyen/release-automation-action/actions"><img alt="status" src="https://github.com/Adyen/release-automation-action/workflows/build-test/badge.svg"></a>
+[![Check dist](https://github.com/Adyen/release-automation-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/Adyen/release-automation-action/actions/workflows/check-dist.yml)
 
 A GitHub action to minimize manual steps required to release (semantic) versions of a software project. 
 
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Preparing the next release
-        uses: Adyen/release-automation-action@v1.2.0
+        uses: Adyen/release-automation-action@v1.3.0
         with:
           # Using a PAT gives the workflow more autonomy than the default GITHUB_TOKEN  
           token: ${{ secrets.YOUR_PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
@@ -85,9 +85,9 @@ Install the dependencies
 $ npm install
 ```
 
-Build the typescript and package it for distribution
+Build the project (will compile the TypeScript to JavaScript - outDir is `./lib`)  
 ```bash
-$ npm run build && npm run package
+$ npm run build 
 ```
 
 Run the unit tests :heavy_check_mark:  
@@ -100,6 +100,11 @@ $ npm test
   ✓ test runs (95ms)
 
 ...
+```
+
+Package for distribution (will create/update `./dist`)
+```bash
+$ npm run package
 ```
 
 ## Change the Code
@@ -134,5 +139,3 @@ See the [actions tab](https://github.com/Adyen/release-automation-action/actions
 
 This action automates it's own releasing. See the [releases.yml](.github/workflows/releases.yml). :rocket:
 
-
-Disclaimer: _This is not an officially supported Adyen product._

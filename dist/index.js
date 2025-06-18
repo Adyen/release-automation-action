@@ -1,272 +1,5 @@
-require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
+/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
-
-/***/ 3109:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const release = __importStar(__nccwpck_require__(878));
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield release.bump();
-        }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
-/***/ 878:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.bump = exports.detectChanges = exports.filterMerged = exports.compareBranches = exports.nextVersion = exports.changelog = void 0;
-const github = __importStar(__nccwpck_require__(5438));
-const core = __importStar(__nccwpck_require__(2186));
-// List of merged pull requests in Markdown
-function changelog(changeset) {
-    const entries = new Set();
-    if (changeset.repository.ref !== null) {
-        for (const { node: { associatedPullRequests: prs } } of changeset.repository.ref.compare.commits.edges) {
-            for (const { node: { number: number } } of prs.edges) {
-                entries.add(number);
-            }
-        }
-    }
-    return Array.from(entries)
-        .sort((a, b) => a - b)
-        .map(pr => `- #${pr}`);
-}
-exports.changelog = changelog;
-// Next semantic version number
-function nextVersion(current, increment, preRelease, separator) {
-    let major;
-    let minor;
-    let patch;
-    const parts = current.split('.').map(x => parseInt(x, 10));
-    [major, minor, patch] = parts;
-    const [unstaged, stage] = current.split(separator);
-    const isPreRelease = preRelease === 'true';
-    const hasStaging = current.includes(separator);
-    if (!separator) {
-        throw new Error('Separator is required');
-    }
-    // end pre-release
-    if (!isPreRelease && hasStaging) {
-        return unstaged;
-    }
-    // bump pre-release
-    if (isPreRelease && hasStaging) {
-        const [, stageVersion] = stage.split('.');
-        let version = parseInt(stageVersion);
-        if (isNaN(version)) {
-            version = 0;
-        }
-        version++;
-        return `${unstaged}${separator}.${version}`;
-    }
-    switch (increment) {
-        case 'patch':
-            patch++;
-            break;
-        case 'minor':
-            minor++;
-            patch = 0;
-            break;
-        case 'major':
-            major++;
-            minor = 0;
-            patch = 0;
-            break;
-    }
-    const version = [major, minor, patch].join('.');
-    // start pre-release
-    if (isPreRelease && !hasStaging) {
-        return `${version}${separator}`;
-    }
-    return version;
-}
-exports.nextVersion = nextVersion;
-// Compare two branches on Github
-function compareBranches(token, { owner, repo, base, head }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const octokit = github.getOctokit(token);
-        return yield octokit.graphql(`
-    query($owner: String!, $repo: String!, $base: String!, $head: String!) {
-        repository(owner: $owner, name: $repo) {
-          name
-          ref(qualifiedName: $base) {
-            compare(headRef: $head) {
-              aheadBy
-              commits(first: 100) {
-                edges {
-                  node {
-                    message
-                    associatedPullRequests(first: 5) {
-                      edges {
-                        node {
-                          number
-                          merged
-                          labels(first: 5) {
-                            nodes {
-                              name
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-    }
-    `, { owner, repo, base, head });
-    });
-}
-exports.compareBranches = compareBranches;
-// Include only merged PR's
-function filterMerged(changeset) {
-    if (changeset.repository.ref !== null) {
-        const merged = changeset.repository.ref.compare.commits.edges.filter(edge => {
-            return edge.node.associatedPullRequests.edges.some(pr => {
-                return pr.node.merged;
-            });
-        });
-        changeset.repository.ref.compare.commits.edges = merged;
-    }
-    return changeset;
-}
-exports.filterMerged = filterMerged;
-// Scan the changelog to decide what kind of release we need
-function detectChanges(changeset) {
-    if (changeset.repository.ref === null ||
-        changeset.repository.ref.compare.aheadBy < 1) {
-        // Nothing to release
-        return '';
-    }
-    let increment = 'patch';
-    // increment based on the merged PR labels
-    for (const { node: { associatedPullRequests: prs } } of changeset.repository.ref.compare.commits.edges) {
-        for (const { node: { labels: { nodes: labels } } } of prs.edges) {
-            for (const { name: label } of labels) {
-                const normalizedLabel = label.toLowerCase().replace(' ', '-');
-                switch (normalizedLabel) {
-                    case 'feature':
-                        increment = 'minor';
-                        break;
-                    case 'breaking-change':
-                        increment = 'major';
-                        return increment;
-                }
-            }
-        }
-    }
-    return increment;
-}
-exports.detectChanges = detectChanges;
-// Define next release
-function bump() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = core.getInput('token', { required: true });
-        const currentVersion = core.getInput('current-version', {
-            required: true
-        });
-        const preRelease = core.getInput('pre-release');
-        const customSeparator = core.getInput('separator');
-        const base = `v${currentVersion}`;
-        const head = core.getInput('develop-branch');
-        let changeset = yield compareBranches(token, Object.assign(Object.assign({}, github.context.repo), { base,
-            head }));
-        changeset = filterMerged(changeset);
-        const logs = changelog(changeset);
-        const increment = detectChanges(changeset);
-        const next = nextVersion(currentVersion, increment, preRelease, customSeparator);
-        core.setOutput('increment', increment);
-        core.setOutput('next-version', next);
-        core.setOutput('changelog', logs.join('\n'));
-    });
-}
-exports.bump = bump;
-
-
-/***/ }),
 
 /***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
@@ -29476,6 +29209,273 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 399:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(2186));
+const release = __importStar(__nccwpck_require__(7776));
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield release.bump();
+        }
+        catch (error) {
+            if (error instanceof Error)
+                core.setFailed(error.message);
+        }
+    });
+}
+run();
+
+
+/***/ }),
+
+/***/ 7776:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.bump = exports.detectChanges = exports.filterMerged = exports.compareBranches = exports.nextVersion = exports.changelog = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const core = __importStar(__nccwpck_require__(2186));
+// List of merged pull requests in Markdown
+function changelog(changeset) {
+    const entries = new Set();
+    if (changeset.repository.ref !== null) {
+        for (const { node: { associatedPullRequests: prs } } of changeset.repository.ref.compare.commits.edges) {
+            for (const { node: { number: number } } of prs.edges) {
+                entries.add(number);
+            }
+        }
+    }
+    return Array.from(entries)
+        .sort((a, b) => a - b)
+        .map(pr => `- #${pr}`);
+}
+exports.changelog = changelog;
+// Next semantic version number
+function nextVersion(current, increment, preRelease, separator) {
+    let major;
+    let minor;
+    let patch;
+    const parts = current.split('.').map(x => parseInt(x, 10));
+    [major, minor, patch] = parts;
+    const [unstaged, stage] = current.split(separator);
+    const isPreRelease = preRelease === 'true';
+    const hasStaging = current.includes(separator);
+    if (!separator) {
+        throw new Error('Separator is required');
+    }
+    // end pre-release
+    if (!isPreRelease && hasStaging) {
+        return unstaged;
+    }
+    // bump pre-release
+    if (isPreRelease && hasStaging) {
+        const [, stageVersion] = stage.split('.');
+        let version = parseInt(stageVersion);
+        if (isNaN(version)) {
+            version = 0;
+        }
+        version++;
+        return `${unstaged}${separator}.${version}`;
+    }
+    switch (increment) {
+        case 'patch':
+            patch++;
+            break;
+        case 'minor':
+            minor++;
+            patch = 0;
+            break;
+        case 'major':
+            major++;
+            minor = 0;
+            patch = 0;
+            break;
+    }
+    const version = [major, minor, patch].join('.');
+    // start pre-release
+    if (isPreRelease && !hasStaging) {
+        return `${version}${separator}`;
+    }
+    return version;
+}
+exports.nextVersion = nextVersion;
+// Compare two branches on Github
+function compareBranches(token, { owner, repo, base, head }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const octokit = github.getOctokit(token);
+        return yield octokit.graphql(`
+    query($owner: String!, $repo: String!, $base: String!, $head: String!) {
+        repository(owner: $owner, name: $repo) {
+          name
+          ref(qualifiedName: $base) {
+            compare(headRef: $head) {
+              aheadBy
+              commits(first: 100) {
+                edges {
+                  node {
+                    message
+                    associatedPullRequests(first: 5) {
+                      edges {
+                        node {
+                          number
+                          merged
+                          labels(first: 5) {
+                            nodes {
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+    }
+    `, { owner, repo, base, head });
+    });
+}
+exports.compareBranches = compareBranches;
+// Include only merged PR's
+function filterMerged(changeset) {
+    if (changeset.repository.ref !== null) {
+        const merged = changeset.repository.ref.compare.commits.edges.filter(edge => {
+            return edge.node.associatedPullRequests.edges.some(pr => {
+                return pr.node.merged;
+            });
+        });
+        changeset.repository.ref.compare.commits.edges = merged;
+    }
+    return changeset;
+}
+exports.filterMerged = filterMerged;
+// Scan the changelog to decide what kind of release we need
+function detectChanges(changeset) {
+    if (changeset.repository.ref === null ||
+        changeset.repository.ref.compare.aheadBy < 1) {
+        // Nothing to release
+        return '';
+    }
+    let increment = 'patch';
+    // increment based on the merged PR labels
+    for (const { node: { associatedPullRequests: prs } } of changeset.repository.ref.compare.commits.edges) {
+        for (const { node: { labels: { nodes: labels } } } of prs.edges) {
+            for (const { name: label } of labels) {
+                const normalizedLabel = label.toLowerCase().replace(' ', '-');
+                switch (normalizedLabel) {
+                    case 'feature':
+                        increment = 'minor';
+                        break;
+                    case 'breaking-change':
+                        increment = 'major';
+                        return increment;
+                }
+            }
+        }
+    }
+    return increment;
+}
+exports.detectChanges = detectChanges;
+// Define next release
+function bump() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = core.getInput('token', { required: true });
+        const currentVersion = core.getInput('current-version', {
+            required: true
+        });
+        const preRelease = core.getInput('pre-release');
+        const customSeparator = core.getInput('separator');
+        const base = `v${currentVersion}`;
+        const head = core.getInput('develop-branch');
+        let changeset = yield compareBranches(token, Object.assign(Object.assign({}, github.context.repo), { base,
+            head }));
+        changeset = filterMerged(changeset);
+        const logs = changelog(changeset);
+        const increment = detectChanges(changeset);
+        const next = nextVersion(currentVersion, increment, preRelease, customSeparator);
+        core.setOutput('increment', increment);
+        core.setOutput('next-version', next);
+        core.setOutput('changelog', logs.join('\n'));
+    });
+}
+exports.bump = bump;
+
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
@@ -31375,9 +31375,8 @@ module.exports = parseParams
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(399);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=index.js.map
