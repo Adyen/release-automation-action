@@ -88,7 +88,7 @@ runs:
     - name: Create a new Github release
       if: inputs.github-release == 'true' || (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'release'))
       id: gh-release
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         github-token: ${{ inputs.token }}
         result-encoding: string
