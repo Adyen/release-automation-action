@@ -19,6 +19,11 @@ on:
 jobs:
   check-dist:
     runs-on: ubuntu-latest
+    permissions:
+      # to checkout the repository
+      contents: read
+      # to upload artifacts
+      actions: write
 
     steps:
       - uses: actions/checkout@v4
