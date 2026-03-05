@@ -38,7 +38,7 @@ runs:
   using: "composite"
   steps:
     - name: Clone consumer repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         token: ${{ inputs.token }}
