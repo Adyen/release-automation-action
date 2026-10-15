@@ -43,6 +43,9 @@
   },
   "overrides": {
     "undici": "^6.24.0",
-    "picomatch": ">=2.3.2"
+    "picomatch": ">=2.3.2",
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^4.3.2"
+    }
   }
 }
