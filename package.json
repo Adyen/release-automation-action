@@ -42,7 +42,7 @@
     "typescript": "^5.2.2"
   },
   "overrides": {
-    "undici": "^6.24.0",
+    "undici": "^6.28.1",
     "picomatch": ">=2.3.2",
     "@istanbuljs/load-nyc-config": {
       "js-yaml": "^4.3.2"
